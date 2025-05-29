@@ -1,10 +1,6 @@
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using System.Text;
-using static System.Net.Mime.MediaTypeNames;
 
-namespace parallels
+namespace dz5
 {
     internal class Program
     {
@@ -109,22 +105,79 @@ namespace parallels
             );
         }
 
-        static void ex4() {
-            int[] arr = new int[1000];
+        static void createFile(int i) {
+            string fileName = @$"fileTest{i + 1}.txt";
+
+            int[] arr = new int[100];
             Random randNum = new Random();
-            for (int i = 0; i < arr.Length; i++)
+            for (int j = 0; j < arr.Length; j++)
             {
-                arr[i] = randNum.Next(0, 100);
+                arr[j] = randNum.Next(0, 100);
             }
 
-            for (int i = 0; i < 5; i++) {
-                string fileName = @$"fileTest{i + 1}.txt";
-                FileStream fs = File.Create(fileName);
-
-                using (var sw = new StreamWriter(fileName, true))
+            using (StreamWriter outputFile = new StreamWriter(fileName))
+            {
+                foreach (int j in arr)
                 {
-                    sw.WriteLine("The next line!");
+                    outputFile.WriteLine(j);
                 }
+            }
+        }
+
+        static void createFiles() {
+            for (int i = 0; i < 5; i++)
+            {
+                createFile(i);
+            }
+        }
+        static void ex4() {
+            Parallel.ForEach(Enumerable.Range(0, 5), i =>
+            {
+                readFile(@$"fileTest{i + 1}.txt");
+            });
+        }
+
+        static void readFile(string fileName) {
+            int lines = 0;
+            using (StreamReader inputFile = new StreamReader(fileName))
+            {
+                while (inputFile.ReadLine() != null)
+                {
+                    lines++;
+                }
+            }
+            Console.WriteLine($"File {fileName} has {lines} numbers.");
+        }
+
+        static void checkBalance(int i) {
+            System.Console.WriteLine("Checking balance for client " + i);
+            Thread.Sleep(1000); 
+        }
+
+        static void giveCash(int i) {
+            System.Console.WriteLine("Giving cash for client " + i);
+            Thread.Sleep(1000);
+        }
+
+        static void topUpAccount(int i) {
+            System.Console.WriteLine("Topping up account for client " + i);
+            Thread.Sleep(1000);
+        }
+
+        static void doAllOperations(int i)
+        {
+            Parallel.Invoke(
+                () => checkBalance(i),
+                () => giveCash(i),
+                () => topUpAccount(i)
+            );
+        }
+
+        static void ex5()
+        {
+            for (int i = 1; i <= 5; i++)
+            {
+                doAllOperations(i);
             }
         }
 
@@ -134,56 +187,10 @@ namespace parallels
             //ex2();
             //ex3();
 
-            //int n = 1000000000;
-            //Stopwatch sw = new Stopwatch();
+            // createFiles();
 
-            //sw.Start();
-            //for (int i = 0; i < n; i++) {
-            //    double res = Math.Sqrt(i);
-            //}
-            //sw.Stop();
-            //Console.WriteLine($"For completed operation in {sw.ElapsedMilliseconds}");
-
-            //sw.Restart();
-            //while (n > 0) { 
-            //    double res = Math.Sqrt(n);
-            //    n--;
-            //}
-            //sw.Stop();
-            //Console.WriteLine($"While completed operation in {sw.ElapsedMilliseconds}");
-
-            //sw.Restart();
-            //Parallel.For(0, n, i => { 
-            //    double res = Math.Sqrt(i); 
-            //});
-            //sw.Stop();
-            //Console.WriteLine($"Parallel completed operation in {sw.ElapsedMilliseconds}");
-
-            //Parallel.Invoke(
-            //    () => task(1), 
-            //    () => task(2), 
-            //    () => task(3), 
-            //    () => task(4)
-            // );
-            //Thread.Sleep(10000);
-            //var outer = Task.Factory.StartNew(() => {
-            //    Console.WriteLine("Outer task started work!");
-            //    var iner = Task.Factory.StartNew(() => {
-            //        Console.WriteLine("Inner task started work!");
-            //        Thread.Sleep(2000);
-            //        Console.WriteLine("Inner task has ended work!");
-            //    });
-            //    Console.WriteLine("Outer task has finished work");
-            //});
-            //Console.WriteLine("Main finished work");
-            //Console.ReadLine();
-        }
-
-        static void task(int i) {
-            Console.WriteLine("Task has started work");
-            Console.WriteLine($"Task {i} in thread : {Task.CurrentId}");
-            Thread.Sleep(2000);
-            Console.WriteLine($"Task {i} has finished work");
+            // ex4();
+            ex5();
         }
     }
 }
